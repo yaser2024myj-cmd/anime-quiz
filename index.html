@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحدي الألعاب والأنمي للشباب</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .quiz-card {
+            background: rgba(30, 41, 59, 0.9);
+            border: 2px solid #6366f1;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        h1 {
+            color: #818cf8;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 25px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-btn {
+            background: #334155;
+            color: #fff;
+            border: 2px solid #475569;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover {
+            background: #6366f1;
+            border-color: #818cf8;
+            transform: translateY(-2px);
+        }
+        .score-container {
+            display: none;
+        }
+        .score-title {
+            font-size: 28px;
+            color: #4ade80;
+            margin-bottom: 15px;
+        }
+        .share-btn {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .share-btn:hover {
+            background: #16a34a;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-card">
+    <div id="quiz-box">
+        <h1 id="title">🎮 تحدي الشباب الاسطوري</h1>
+        <div class="question-text" id="question">جاري تحميل السؤال...</div>
+        <div class="options-container" id="options"></div>
+    </div>
+
+    <div class="score-container" id="score-box">
+        <div class="score-title">🎯 النتيجة النهائية</div>
+        <p id="score-text" style="font-size: 20px; margin-bottom: 15px;"></p>
+        <p id="badge-text" style="font-size: 18px; color: #facc15; font-weight: bold;"></p>
+        <button class="share-btn" onclick="copyResult()">نسخ النتيجة لتحدي فهد وتيم 🚀</button>
+    </div>
+</div>
+
+<script>
+    const questionsBank = [
+        {
+            q: "أي من الفواكه التالية تعتبر من نوع Logia (Elemental) في Blox Fruits؟",
+            options: ["Dough", "Ice", "Dragon", "Venom"],
+            correct: 1
+        },
+        {
+            q: "في لعبة Jujutsu Shenanigans، أي شخصية تتميز بكومبو سريع بعد التفادي؟",
+            options: ["Yuji", "Gojo", "Megumi", "Mahito"],
+            correct: 0
+        },
+        {
+            q: "ما اسم سلاح كريتوس الرئيسي في بداية God of War (2018)؟",
+            options: ["Blades of Chaos", "Leviathan Axe", "Draupnir Spear", "Blade of Olympus"],
+            correct: 1
+        },
+        {
+            q: "ما اسم زوجة كريتوس وأم أتريوس في God of War Ragnarök والإضافة؟",
+            options: ["Freya", "Faye", "Angrboda", "Sif"],
+            correct: 1
+        },
+        {
+            q: "ما الذي يميز تصميم شخصية Rayman الكلاسيكية؟",
+            options: ["أطرافه منفصلة عن جسمه", "يرتدي خوذة حديدية", "يداه أسلحة", "لا يستطيع القفز"],
+            correct: 0
+        },
+        {
+            q: "في لعبة Rocket League، ماذا يحدث عند التصادم بسرعات الـ Supersonic؟",
+            options: ["تتفجر سيارة الخصم (Demo)", "ترتد سيارتك", "تنقص طاقتك", "لا يحدث شيء"],
+            correct: 0
+        }
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startQuiz() {
+        currentQuestions = shuffle([...questionsBank]);
+        currentIndex = 0;
+        score = 0;
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = currentQuestions[currentIndex];
+        document.getElementById("question").innerText = `${currentIndex + 1}. ${q.q}`;
+        const optionsBox = document.getElementById("options");
+        optionsBox.innerHTML = "";
+
+        // خلط الخيارات عشوائياً
+        let optionsWithIndex = q.options.map((opt, i) => ({ text: opt, isCorrect: i === q.correct }));
+        optionsWithIndex = shuffle(optionsWithIndex);
+
+        optionsWithIndex.forEach(opt => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerText = opt.text;
+            btn.onclick = () => selectAnswer(opt.isCorrect);
+            optionsBox.appendChild(btn);
+        });
+    }
+
+    function selectAnswer(isCorrect) {
+        if (isCorrect) score++;
+        currentIndex++;
+
+        if (currentIndex < currentQuestions.length) {
+            showQuestion();
+        } else {
+            showScore();
+        }
+    }
+
+    function showScore() {
+        document.getElementById("quiz-box").style.display = "none";
+        document.getElementById("score-box").style.display = "block";
+        document.getElementById("score-text").innerText = `جبت ${score} من ${currentQuestions.length}!`;
+
+        let badge = "";
+        if (score === currentQuestions.length) badge = "👑 ملك الألعاب والأوتاكو الأسطوري!";
+        else if (score >= 4) badge = "🔥 محترف ورائع!";
+        else badge = "عامر شباب البومب (تحتاج تدريب!) 😅";
+
+        document.getElementById("badge-text").innerText = badge;
+    }
+
+    function copyResult() {
+        const text = `جبت ${score}/${currentQuestions.length} في تحدي الألعاب! وروني مين يقدر يتحداني 🔥`;
+        navigator.clipboard.writeText(text);
+        alert("تم نسخ النتيجة! أرسلها للجروب الحين 😉");
+    }
+
+    startQuiz();
+</script>
+
+</body>
+</html>
